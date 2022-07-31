@@ -1,0 +1,11 @@
+.alert{
+        padding-bottom: 10px;
+            padding-top: 10px;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 1.2em;
+            font-weight: inherit;
+            color: rgb(23, 51, 209);
+            text-align: center;
+            background-color: aliceblue;
+            margin: 0;
+}

@@ -1,99 +1,110 @@
-import { Component } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+
 import { nanoid } from 'nanoid';
 
 import ContactForm from './ContactForm';
 import ContactList from './ContactList';
 import Filter from './Filter';
 
-class Phonebook extends Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
-  };
+import stl from './phonebook.module.css';
+
+function Phonebook() {
+  const [contacts, setContacts] = useState([
+    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+  ]);
+
+  const [filter, setFilter] = useState('');
   // get files from local storage
 
-  componentDidMount() {
-    const data = localStorage.getItem('contacts');
-    const contacts = JSON.parse(data);
-    if (data?.length) {
-      this.setState({ contacts }); // JSON.parse - convert string to object
+  const firstRender = useRef(true);
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      const data = localStorage.getItem('contacts');
+      const contacts = JSON.parse(data); //todo JSON.parse - convert string to object
+      if (contacts?.length) {
+        setContacts(contacts);
+      }
     }
-  }
+  }, []);
 
-  componentDidUpdate(prevProps, prevState) {
-    const { contacts } = this.state;
-    if (prevState.contacts !== contacts) {
-      localStorage.setItem('contacts', JSON.stringify(contacts));
+  useEffect(() => {
+    if (!firstRender.current) {
+      localStorage.setItem('contacts', JSON.stringify(contacts)); //todo JSON.parse - convert string to object
     }
-  }
+  }, [contacts]);
 
-  addContacts = ({ name, number }) => {
-    // this.setState({ contacts: item.contacts.value })
-    const { contacts } = this.state;
-    const newContactName = name.toLowerCase();
-    const isDublicate = contacts.find(
-      item => item.name.toLowerCase() === newContactName
-    );
-    if (isDublicate) {
-      alert(`${name} is alredy in your phonebook`);
-      return;
-    }
+  const addContacts = useCallback(
+    ({ name, number }) => {
+      const newContactName = name.toLowerCase();
+      const isDublicate = contacts.find(
+        item => item.name.toLowerCase() === newContactName
+      );
+      if (isDublicate) {
+        alert(`${name} is alredy in your phonebook`);
+        return;
+      }
 
-    this.setState(prevState => {
-      const { contacts } = prevState;
-      const newContact = {
-        id: nanoid(),
-        name,
-        number,
-      };
-      return {
-        contacts: [...contacts, newContact],
-      };
-    });
-  };
+      setContacts(prevContacts => {
+        const newContact = {
+          id: nanoid(),
+          name,
+          number,
+        };
+        return [...prevContacts, newContact];
+      });
+    },
+    [contacts, setContacts]
+  );
 
-  deleteContact = id => {
-    this.setState(({ contacts }) => ({
-      contacts: contacts.filter(item => item.id !== id),
-    }));
-  };
+  const deleteContact = useCallback(
+    id => {
+      const newContacts = contacts.filter(item => item.id !== id);
+      setContacts(newContacts);
+    },
+    [contacts, setContacts]
+  );
 
-  filterChange = ({ target }) => {
-    const { value } = target;
-    this.setState({
-      filter: value,
-    });
-  };
+  const filterChange = useCallback(
+    ({ target }) => {
+      const { value } = target;
+      setFilter(value);
+    },
+    [setFilter]
+  );
 
-  getContactsFiltered = () => {
-    const { contacts, filter } = this.state;
+  const getContactsFiltered = useCallback(() => {
     if (!filter) {
       return contacts;
     }
+
     const filterRequest = filter.toLowerCase();
     const filteredContacts = contacts.filter(({ name }) => {
-      const result = name.toLowerCase().includes(filterRequest);
-      return result;
+      return name.toLowerCase().includes(filterRequest);
     });
     return filteredContacts;
-  };
+  }, [filter, contacts]);
 
-  render() {
-    const { filter } = this.state;
-    const filteredResult = this.getContactsFiltered();
-    return (
-      <div>
-        <ContactForm onSubmit={this.addContacts} />
-        <Filter filter={filter} onFilter={this.filterChange} />
-        <ContactList contacts={filteredResult} onDelete={this.deleteContact} />
-      </div>
-    );
-  }
+  const filteredResult = getContactsFiltered();
+
+  return (
+    <div>
+      <ContactForm onSubmit={addContacts} />
+
+      <Filter filter={filter} onFilter={filterChange} />
+      {!filteredResult.length && (
+        <p className={stl.alert}>
+          Життя має в точності ту цінність, якою ми хочемо її наділити - хочеш
+          знайти запис, спочатку збережи його
+        </p>
+      )}
+      <ContactList contacts={filteredResult} onDelete={deleteContact} />
+    </div>
+  );
 }
 
 export default Phonebook;
