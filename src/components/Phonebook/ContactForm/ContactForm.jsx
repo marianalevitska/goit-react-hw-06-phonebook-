@@ -22,7 +22,7 @@ function ContactForm({ onSubmit }) {
       onSubmit(state);
       setState({ name: '', number: '' });
     },
-    [setState, state]
+    [setState, state, onSubmit]
   );
 
   const { name, number } = state;
