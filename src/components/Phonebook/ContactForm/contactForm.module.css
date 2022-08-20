@@ -1,0 +1,44 @@
+.form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+    padding-bottom: 15px;
+    background-color: aliceblue;
+}
+
+.label {
+    margin-bottom: 10px;
+    margin-top: 10px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.input_line {
+    width: 200px;
+    margin-bottom: 10px;
+    border: solid 2px #ccc;
+    color: black;
+    padding: 5px;
+    border-radius: 15px;
+}
+
+.input_line:last-child {
+    margin-bottom: 0;
+}
+
+.button {
+    width: auto;
+    border: solid 2px #ccc;
+    color: black;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.button:hover,
+.button:focus {
+    background-color: cadetblue;
+    color: white;
+}
